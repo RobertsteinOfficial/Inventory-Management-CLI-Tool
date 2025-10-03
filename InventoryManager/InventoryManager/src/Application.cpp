@@ -3,7 +3,9 @@
 
 #include <iostream>
 #include <string>
-#include "sqlite3.h"
+#include <iomanip>
+
+#include <sqlite3.h>
 
 //Database initialization
 bool InitializeDatabase(sqlite3*& db)
@@ -94,6 +96,53 @@ void AddItem(sqlite3* db)
 	sqlite3_finalize(statement);
 }
 
+void ListItems(sqlite3* db)
+{
+	const char* selectSQL = "SELECT id, name, quantity, price FROM inventory";
+	sqlite3_stmt* statement;
+
+	int status = sqlite3_prepare_v2(db, selectSQL, -1, &statement, nullptr);
+
+	if (status != SQLITE_OK)
+	{
+		std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+		return;
+	}
+
+	if (sqlite3_step(statement) == SQLITE_DONE) {
+		std::cout << "No items found in the inventory.\n";
+		return;
+	}
+
+	std::cout << "\n--- Inventory Items ---\n";
+	std::cout << std::left << std::setw(5) << "ID"
+		<< std::setw(20) << "Name"
+		<< std::setw(10) << "Quantity"
+		<< std::setw(10) << "Price" << "\n";
+	std::cout << "--------------------------\n";
+
+
+	while ((status = sqlite3_step(statement)) == SQLITE_ROW)
+	{
+		int id = sqlite3_column_int(statement, 0);
+		const char* name = reinterpret_cast<const char*>(sqlite3_column_text(statement, 1));
+		int quantity = sqlite3_column_double(statement, 2);
+		double price = sqlite3_column_double(statement, 3);
+
+		std::cout << std::left << std::setw(5) << id
+			<< std::setw(20) << name
+			<< std::setw(10) << quantity
+			<< std::setw(10) << std::fixed << std::setprecision(2) << price << "\n";
+	}
+
+	if (status != SQLITE_DONE)
+	{
+		std::cerr << "Error listing items: " << sqlite3_errmsg(db) << std::endl;
+	}
+
+	sqlite3_finalize(statement);
+}
+
 void DisplayMenu()
 {
 	std::cout << "\nInventory Management System\n";
@@ -118,13 +167,15 @@ int main()
 	{
 		DisplayMenu();
 		std::cin >> choice;
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
 		switch (choice)
 		{
 			case 1: 
 				AddItem(db);
 				break;
 			case 2: 
-				std::cout << "Not available yet.\n";
+				ListItems(db);
 				break;
 			case 3: 
 				std::cout << "Closing program...";
