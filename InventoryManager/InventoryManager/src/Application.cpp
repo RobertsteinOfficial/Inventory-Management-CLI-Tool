@@ -12,7 +12,8 @@ void DisplayMenu()
 	std::cout << "\nInventory Management System\n";
 	std::cout << "1. Add Item\n";
 	std::cout << "2. List All Items\n";
-	std::cout << "3. Exit\n";
+	std::cout << "3. Remove Item\n";
+	std::cout << "4. Exit\n";
 	std::cout << "Enter your choice: ";
 }
 
@@ -42,6 +43,9 @@ int main()
 			inventoryManager.ListItems();
 			break;
 		case 3:
+			inventoryManager.RemoveItem();
+			break;
+		case 4:
 			std::cout << "Closing program...";
 			break;
 		default:
@@ -50,7 +54,7 @@ int main()
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		}
 
-	} while (choice != 3);
+	} while (choice != 4);
 
 	return 0;
 }

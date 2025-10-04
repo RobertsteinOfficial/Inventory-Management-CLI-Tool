@@ -21,7 +21,10 @@ public:
 
 	void AddItem();
 	void ListItems();
+	void RemoveItem();
 
 private:
 	DatabaseManager& dbManager;
+
+	bool CheckItem(int id);
 };

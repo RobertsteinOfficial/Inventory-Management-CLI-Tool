@@ -112,3 +112,78 @@ void InventoryManager::ListItems()
 
 	sqlite3_finalize(statement);
 }
+
+void InventoryManager::RemoveItem()
+{
+	int id;
+	std::cout << "Enter the ID of the item to remove: ";
+
+	while (!(std::cin >> id))
+	{
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		std::cout << "Invalid input. Please enter a valid integer ID: ";
+	}
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	if (!CheckItem(id)) return;
+
+	sqlite3* db = dbManager.GetDatabase();
+	const char* deleteSQL = "DELETE FROM inventory WHERE id = ?";
+	sqlite3_stmt* deleteStatement;
+
+	int status = sqlite3_prepare_v2(db, deleteSQL, -1, &deleteStatement, nullptr);
+	if (status != SQLITE_OK)
+	{
+		std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+		return;
+	}
+
+	sqlite3_bind_int(deleteStatement, 1, id);
+
+	status = sqlite3_step(deleteStatement);
+	if (status != SQLITE_DONE)
+	{
+		std::cerr << "Failed to remove item: " << sqlite3_errmsg(db) << std::endl;
+	}
+	else
+	{
+		std::cout << "Item removed successfully.\n";
+	}
+
+
+	sqlite3_finalize(deleteStatement);
+}
+
+bool InventoryManager::CheckItem(int id)
+{
+	sqlite3* db = dbManager.GetDatabase();
+
+	const char* checkSQL = "SELECT id FROM inventory WHERE id = ?";
+	sqlite3_stmt* checkStatement;
+
+	int status = sqlite3_prepare_v2(db, checkSQL, -1, &checkStatement, nullptr);
+	if (status != SQLITE_OK)
+	{
+		std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+		return false;
+	}
+
+	sqlite3_bind_int(checkStatement, 1, id);
+	status = sqlite3_step(checkStatement);
+	if (status == SQLITE_DONE)
+	{
+		std::cout << "No item found with ID " << id << ". Nothing to remove.\n";
+		sqlite3_finalize(checkStatement);
+		return false;
+	}
+	else if (status != SQLITE_ROW)
+	{
+		std::cerr << "Error checking item: " << sqlite3_errmsg(db) << std::endl;
+		sqlite3_finalize(checkStatement);
+		return false;
+	}
+
+	sqlite3_finalize(checkStatement);
+	return true;
+}
