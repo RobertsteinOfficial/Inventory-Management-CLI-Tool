@@ -1,85 +1,90 @@
-# \# Inventory Management CLI Tool
+# Inventory Management CLI Tool
 
-# 
 
-# A simple command-line tool for managing inventory using SQLite.
+## A simple command-line tool for managing inventory using SQLite.
 
-# 
+---
 
-# ---
+##  **Features**
 
-# 
+\- Add items to the inventory.
 
-# \## \*\*Features\*\*
+\- List all items in the inventory.
 
-# \- Add items to the inventory.
+\- Search for items by name or ID.
 
-# \- List all items in the inventory.
+\- Remove items from the inventory.
 
-# \- Search for items by name or ID.
+--- 
 
-# \- Remove items from the inventory.
+## **Prerequisites**
 
-# 
+\- CMake (version 3.10 or higher)
 
-# ---
+\- C++17 compatible compiler (e.g., GCC, Clang, MSVC)
 
-# 
 
-# \## \*\*Prerequisites\*\*
+ ---
 
-# \- CMake (version 3.10 or higher)
+## **Building the Project**
 
-# \- C++17 compatible compiler (e.g., GCC, Clang, MSVC)
 
-# 
+### **1. Clone the Repository**
 
-# ---
+```bash
 
-# 
+git clone https://github.com/yourusername/InventoryManager.git
 
-# \## \*\*Building the Project\*\*
+cd InventoryManager
 
-# 
+```
 
-# \### \*\*1. Clone the Repository\*\*
+### **2. Create a Build Directory**
 
-# ```bash
+```bash
 
-# git clone https://github.com/yourusername/InventoryManager.git
+mkdir -p build
 
-# cd InventoryManager
+cd build
 
-# 
+```
 
-# \### \*\*2. Create a Build Directory\*\*
+### **3. Run CMake**
 
-# mkdir -p build
+```bash
 
-# cd build
+cmake ..
 
-# \### \*\*3. Run CMake\*\*
+```
 
-# cmake ..
+### **4. Build the Project**
 
-# \### \*\*4. Build the Project\*\*
+```bash
 
-# cmake --build .
+cmake --build .
 
-# ---
+```
 
-# 
+---
 
-# \## \*\*Running the Program\*\*
 
-#
+## **Running the Program**
 
-# # \### \*\*On Linux/macOS\*\*
 
-# cd build/Debug
-# ./inventory_manager
+### **On Linux/macOS**
 
-# # \### \*\*On Windows\*\*
+```bash
 
-# cd build/Debug
-# inventory_manager.exe
+cd build/Debug
+./inventory_manager
+
+```
+
+### **On Windows**
+
+```bash
+
+cd build/Debug
+inventory_manager.exe
+
+```
