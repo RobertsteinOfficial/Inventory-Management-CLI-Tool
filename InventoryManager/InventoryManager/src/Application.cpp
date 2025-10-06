@@ -12,8 +12,9 @@ void DisplayMenu()
 	std::cout << "\nInventory Management System\n";
 	std::cout << "1. Add Item\n";
 	std::cout << "2. List All Items\n";
-	std::cout << "3. Remove Item\n";
-	std::cout << "4. Exit\n";
+	std::cout << "3. Search Item\n";
+	std::cout << "4. Remove Item\n";
+	std::cout << "5. Exit\n";
 	std::cout << "Enter your choice: ";
 }
 
@@ -23,9 +24,9 @@ int main()
 
 	if (!dbManager.OpenDatabase("inventory.db")) { return 1; }
 	if (!dbManager.InitializeDatabase()) { return 1; }
-	
+
 	InventoryManager inventoryManager(dbManager);
-	
+
 	int choice;
 
 	do
@@ -43,18 +44,22 @@ int main()
 			inventoryManager.ListItems();
 			break;
 		case 3:
-			inventoryManager.RemoveItem();
+			inventoryManager.SearchItem();
 			break;
 		case 4:
+			inventoryManager.RemoveItem();
+			break;
+		case 5:
 			std::cout << "Closing program...";
 			break;
 		default:
 			std::cout << "Invalid input.\n";
 			std::cin.clear();
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			break;
 		}
 
-	} while (choice != 4);
+	} while (choice != 5);
 
 	return 0;
 }

@@ -20,6 +20,7 @@ public:
 	~InventoryManager();
 
 	void AddItem();
+	void SearchItem();
 	void ListItems();
 	void RemoveItem();
 
@@ -27,4 +28,6 @@ private:
 	DatabaseManager& dbManager;
 
 	bool CheckItem(int id);
+	void SearchItemById();
+	void SearchItemByName();
 };

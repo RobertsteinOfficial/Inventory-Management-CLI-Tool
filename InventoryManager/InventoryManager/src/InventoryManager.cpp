@@ -63,6 +63,45 @@ void InventoryManager::AddItem()
 	sqlite3_finalize(statement);
 }
 
+void InventoryManager::SearchItem()
+{
+	int choice;
+
+	do
+	{
+		std::cout << "\nBy what criteria do you want to search?\n";
+		std::cout << "1. By ID\n";
+		std::cout << "2. By Name\n";
+
+		std::cin >> choice;
+
+		if (std::cin.fail())
+		{
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			std::cout << "Invalid input. Enter a valid number.\n";
+			continue;
+		}
+
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+		switch (choice)
+		{
+		case 1:
+			SearchItemById();
+			break;
+		case 2:
+			SearchItemByName();
+			break;
+		default:
+			std::cout << "Invalid input.\n";
+			break;
+		}
+
+	} while (choice != 1 && choice != 2);
+
+}
+
 void InventoryManager::ListItems()
 {
 	sqlite3* db = dbManager.GetDatabase();
@@ -186,4 +225,122 @@ bool InventoryManager::CheckItem(int id)
 
 	sqlite3_finalize(checkStatement);
 	return true;
+}
+
+void InventoryManager::SearchItemById()
+{
+	int searchId;
+
+	std::cout << "Enter item ID:\n";
+	while (!(std::cin >> searchId) || searchId < 0)
+	{
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		std::cout << "Invalid input. Enter a positive integer ID: ";
+	}
+
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+	sqlite3* db = dbManager.GetDatabase();
+	const char* searchSQL = "SELECT * FROM inventory WHERE id = ?";
+	sqlite3_stmt* searchStatement;
+
+
+	int status = sqlite3_prepare_v2(db, searchSQL, -1, &searchStatement, nullptr);
+	if (status != SQLITE_OK)
+	{
+		std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+		return;
+	}
+
+	sqlite3_bind_int(searchStatement, 1, searchId);
+
+	status = sqlite3_step(searchStatement);
+	if (status != SQLITE_ROW)
+	{
+		std::cerr << "Failed to find item: " << sqlite3_errmsg(db) << std::endl;
+		sqlite3_finalize(searchStatement);
+		return;
+	}
+
+
+	std::cout << "\n--- Inventory Items ---\n";
+	std::cout << std::left << std::setw(5) << "ID"
+		<< std::setw(20) << "Name"
+		<< std::setw(10) << "Quantity"
+		<< std::setw(10) << "Price" << "\n";
+	std::cout << "--------------------------\n";
+
+
+	int id = sqlite3_column_int(searchStatement, 0);
+	const char* name = reinterpret_cast<const char*>(sqlite3_column_text(searchStatement, 1));
+	int quantity = sqlite3_column_int(searchStatement, 2);
+	double price = sqlite3_column_double(searchStatement, 3);
+
+	std::cout << std::left << std::setw(5) << id
+		<< std::setw(20) << name
+		<< std::setw(10) << quantity
+		<< std::setw(10) << std::fixed << std::setprecision(2) << price << "\n";
+
+
+	sqlite3_finalize(searchStatement);
+}
+
+void InventoryManager::SearchItemByName()
+{
+	std::string name;
+
+	std::cout << "Enter item name:\n";
+	std::getline(std::cin, name);
+
+	sqlite3* db = dbManager.GetDatabase();
+	const char* searchSQL = "SELECT * FROM inventory WHERE LOWER(name) LIKE LOWER(?)";
+	std::string searchTerm = "%" + name + "%";
+
+	sqlite3_stmt* searchStatement;
+
+	int status = sqlite3_prepare_v2(db, searchSQL, -1, &searchStatement, nullptr);
+
+	if (status != SQLITE_OK)
+	{
+		std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+		return;
+	}
+
+	sqlite3_bind_text(searchStatement, 1, name.c_str(), -1, SQLITE_STATIC);
+
+	std::cout << "\n--- Inventory Items ---\n";
+	std::cout << std::left << std::setw(5) << "ID"
+		<< std::setw(20) << "Name"
+		<< std::setw(10) << "Quantity"
+		<< std::setw(10) << "Price" << "\n";
+	std::cout << "--------------------------\n";
+
+	bool firstItem = true;
+	while ((status = sqlite3_step(searchStatement) == SQLITE_ROW))
+	{
+
+		int id = sqlite3_column_int(searchStatement, 0);
+		const char* name = reinterpret_cast<const char*>(sqlite3_column_text(searchStatement, 1));
+		int quantity = sqlite3_column_int(searchStatement, 2);
+		double price = sqlite3_column_double(searchStatement, 3);
+
+		std::cout << std::left << std::setw(5) << id
+			<< std::setw(20) << name
+			<< std::setw(10) << quantity
+			<< std::setw(10) << std::fixed << std::setprecision(2) << price << "\n";
+		firstItem = false;
+	}
+
+	if (firstItem)
+	{
+		std::cout << "No items with name " + name + " found in the inventory.\n";
+	}
+	else if (status != SQLITE_DONE)
+	{
+		std::cerr << "Error listing items: " << sqlite3_errmsg(db) << std::endl;
+	}
+
+	sqlite3_finalize(searchStatement);
+
 }
